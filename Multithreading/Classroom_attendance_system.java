@@ -89,3 +89,72 @@ Main Method
 Thread Coordination
 Synchronization
 */
+class Classroom {
+    boolean attendanceStarted = false;
+
+    public synchronized void waitForAttendance() {
+        while (!attendanceStarted) {
+            System.out.println("Student Waiting...");
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        System.out.println("Student Marked Present");
+    }
+
+    public synchronized void startAttendance() {
+        attendanceStarted = true;
+        System.out.println("Teacher Started Attendance");
+        notifyAll();
+    }
+}
+
+class TeacherThread extends Thread {
+    Classroom classroom;
+
+    public TeacherThread(Classroom classroom) {
+        this.classroom = classroom;
+    }
+
+    public void run() {
+        classroom.startAttendance();
+    }
+}
+
+class StudentThread extends Thread {
+    Classroom classroom;
+
+    public StudentThread(Classroom classroom) {
+        this.classroom = classroom;
+    }
+
+    public void run() {
+        classroom.waitForAttendance();
+    }
+}
+
+public class ClassroomAttendanceSystem {
+    public static void main(String[] args) {
+        Classroom classroom = new Classroom();
+
+        StudentThread student1 = new StudentThread(classroom);
+        StudentThread student2 = new StudentThread(classroom);
+        StudentThread student3 = new StudentThread(classroom);
+        
+        TeacherThread teacher = new TeacherThread(classroom);
+
+        student1.start();
+        student2.start();
+        student3.start();
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        teacher.start();
+    }
+}

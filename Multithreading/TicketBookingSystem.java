@@ -79,3 +79,47 @@ Possible Output
 
     Thread3 Booking Failed
 */
+class Theater {
+    private int totalSeats = 5;
+
+    public synchronized void bookSeat(int seats) {
+        String threadName = Thread.currentThread().getName();
+        if (totalSeats >= seats) {
+            System.out.println(threadName + " Booking Successful");
+            totalSeats -= seats;
+            System.out.println("Remaining Seats: " + totalSeats);
+        } else {
+            System.out.println(threadName + " Booking Failed");
+        }
+    }
+}
+
+class BookingThread extends Thread {
+    private Theater theater;
+    private int seatsRequired;
+
+    public BookingThread(Theater theater, int seatsRequired, String threadName) {
+        super(threadName);
+        this.theater = theater;
+        this.seatsRequired = seatsRequired;
+    }
+
+    @Override
+    public void run() {
+        theater.bookSeat(seatsRequired);
+    }
+}
+
+public class TicketBookingSystem {
+    public static void main(String[] args) {
+        Theater theater = new Theater();
+
+        BookingThread thread1 = new BookingThread(theater, 2, "Thread1");
+        BookingThread thread2 = new BookingThread(theater, 2, "Thread2");
+        BookingThread thread3 = new BookingThread(theater, 2, "Thread3");
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
+    }
+}
